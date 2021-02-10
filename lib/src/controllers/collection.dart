@@ -1,6 +1,5 @@
 import '../kuzzle.dart';
 import '../kuzzle/errors.dart';
-import '../kuzzle/errors.dart';
 import '../kuzzle/request.dart';
 
 import '../search_result/specifications.dart';
@@ -31,18 +30,6 @@ class CollectionController extends KuzzleController {
     return response.result as Map<String, dynamic>;
   }
 
-  /// Deletes a [collection]
-  Future<bool> delete(String index, String collection) async {
-    final response = await kuzzle.query(KuzzleRequest(
-      controller: name,
-      action: 'delete',
-      index: index,
-      collection: collection,
-    ));
-
-    return response.status == 200 && response.result == null;
-  }
-
   /// Deletes validation specifications for a data collection.
   ///
   /// The request succeeds even if no specification
@@ -50,7 +37,8 @@ class CollectionController extends KuzzleController {
   ///
   /// Note: an empty specification is implicitly applied to all collections.
   /// In a way, "no specification set" means "all documents are valid".
-  Future<Map<String, dynamic>> deleteSpecifications(String index, String collection) async {
+  Future<Map<String, dynamic>> deleteSpecifications(
+    String index, String collection) async {
     final response = await kuzzle.query(KuzzleRequest(
       controller: name,
       action: 'deleteSpecifications',
@@ -74,12 +62,15 @@ class CollectionController extends KuzzleController {
       return response.result as bool;
     }
 
-    throw BadResponseFormatError('$name.exists: bad response format', response);
+    throw BadResponseFormatError(response.error?.id, 
+      '$name.exists: bad response format', 
+      response
+    );
   }
 
   /// Returns a data [collection] mapping.
   Future<Map<String, dynamic>> getMapping(String index, String collection,
-      [bool includeKuzzleMeta = false]) async {
+      {bool includeKuzzleMeta = false}) async {
     final response = await kuzzle.query(KuzzleRequest(
       controller: name,
       action: 'getMapping',
@@ -92,7 +83,8 @@ class CollectionController extends KuzzleController {
   }
 
   /// Returns the validation specifications associated to the [collection].
-  Future<Map<String, dynamic>> getSpecifications(String index, String collection) async {
+  Future<Map<String, dynamic>> getSpecifications(
+    String index, String collection) async {
     final request = KuzzleRequest(
       controller: name,
       action: 'getSpecifications',
@@ -108,7 +100,8 @@ class CollectionController extends KuzzleController {
   /// Returns the list of data collections associated to a provided data index.
   ///
   /// The returned list is sorted in alphanumerical order.
-  Future<Map<String, dynamic>> list(String index, {int from, int size, String type}) async {
+  Future<Map<String, dynamic>> list(
+    String index, {int from, int size, String type}) async {
     final response = await kuzzle.query(KuzzleRequest(
       controller: name,
       action: 'list',
@@ -189,7 +182,10 @@ class CollectionController extends KuzzleController {
     );
     final response = await kuzzle.query(request);
 
-    return SpecificationSearchResult(kuzzle, request: request, response: response);
+    return SpecificationSearchResult(
+      kuzzle, 
+      request: request, 
+      response: response);
   }
 
   /// Empties a [collection] by removing all its documents,
@@ -270,23 +266,24 @@ class CollectionController extends KuzzleController {
   Future<Map<String, dynamic>> updateSpecifications(
     String index,
     String collection,
-    bool strict,
-    Map<String, dynamic> fields,
+    Map<String, dynamic> specifications,
   ) async {
     final response = await kuzzle.query(KuzzleRequest(
       controller: name,
       index: index,
       collection: collection,
       action: 'updateSpecifications',
-      body: <String, dynamic>{'strict': strict, 'fields': fields},
+      body: specifications,
     ));
 
     final result = response.result as Map<String, dynamic>;
-    if (result['strict'] is bool && result['fields'] is Map) {
+
+    if (result['fields'] is Map) {
       return result;
     }
 
     throw BadResponseFormatError(
+      response.error?.id,
       'UpdateSpecifications: bad response format',
       response,
     );
@@ -298,15 +295,14 @@ class CollectionController extends KuzzleController {
   Future<bool> validateSpecifications(
     String index,
     String collection,
-    bool strict,
-    Map<String, dynamic> fields,
+    Map<String, dynamic> specifications,
   ) async {
     final response = await kuzzle.query(KuzzleRequest(
         controller: name,
         collection: collection,
         index: index,
         action: 'validateSpecifications',
-        body: {'strict': strict, 'fields': fields}));
+        body: specifications));
 
     return (response.result as Map<String, dynamic>)['valid'] as bool;
   }

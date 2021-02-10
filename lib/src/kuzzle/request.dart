@@ -11,7 +11,8 @@ class KuzzleRequest {
       this.index,
       this.jwt,
       this.requestId,
-      this.refresh,
+      this.waitForRefresh,
+      this.force,
       this.uid,
       this.volatile,
       this.startTime,
@@ -29,20 +30,23 @@ class KuzzleRequest {
       this.scope,
       this.state,
       this.source,
+      this.userId,
       this.users,
+      this.verb,
       this.includeKuzzleMeta}) {
     requestId ??= _uuid.v4();
   }
 
   KuzzleRequest.clone(KuzzleRequest request) {
+    requestId = _uuid.v4();
     action = request.action;
     body = request.body;
     collection = request.collection;
     controller = request.controller;
     index = request.index;
     jwt = request.jwt;
-    // requestId = request.requestId;
-    refresh = request.refresh;
+    waitForRefresh = request.waitForRefresh;
+    force = request.force;
     uid = request.uid;
     volatile = request.volatile;
     startTime = request.startTime;
@@ -59,7 +63,9 @@ class KuzzleRequest {
     reset = request.reset;
     scope = request.scope;
     state = request.state;
+    userId = request.userId;
     users = request.users;
+    verb = request.verb;
     source = request.source;
     includeKuzzleMeta = request.includeKuzzleMeta;
   }
@@ -72,8 +78,9 @@ class KuzzleRequest {
     index = data['index'] as String;
     jwt = data['jwt'] as String;
     requestId = data['requestId'] as String;
-    requestId ??= _uuid.v4() as String;
-    refresh = data['refresh'] as String;
+    requestId ??= _uuid.v4();
+    waitForRefresh = (data['refresh'] as String) == 'wait_for' ? true : false;
+    force = data['force'] as bool;
     uid = data['_id'] as String;
     volatile = data['volatile'] as Map<String, dynamic>;
     startTime = data['startTime'] == null
@@ -94,7 +101,9 @@ class KuzzleRequest {
     reset = data['reset'] as bool;
     scope = data['scope'] as String;
     state = data['state'] as String;
+    userId = data['userId'] as String;
     users = data['users'] as String;
+    verb = data['verb'] as String;
     source = data['source'] as bool;
     includeKuzzleMeta = data['includeKuzzleMeta'] as bool;
   }
@@ -123,10 +132,13 @@ class KuzzleRequest {
     if (requestId != null) {
       map['requestId'] = requestId;
     }
-    if (refresh != null) {
-      // we follow the api but allow some more logical "mistakes"
-      // (the only allowed value for refresh arg is "wait_for")
+    if (force != null) {
+      map['force'] = force;
+    }
+    if (waitForRefresh == true) {
       map['refresh'] = 'wait_for';
+    } else if (waitForRefresh == false) {
+      map['refresh'] = 'false';
     }
     if (uid != null) {
       map['_id'] = uid;
@@ -176,8 +188,14 @@ class KuzzleRequest {
     if (state != null) {
       map['state'] = state;
     }
+    if (userId != null) {
+      map['userId'] = userId;
+    }
     if (users != null) {
       map['users'] = users;
+    }
+    if (verb != null) {
+      map['verb'] = verb;
     }
     if (source != null) {
       map['source'] = source;
@@ -200,7 +218,8 @@ class KuzzleRequest {
   String index;
   String jwt;
   String requestId;
-  String refresh;
+  bool waitForRefresh;
+  bool force;
   String uid;
   Map<String, dynamic> volatile;
   DateTime startTime;
@@ -218,6 +237,8 @@ class KuzzleRequest {
   bool source;
   String scope;
   String state;
+  String userId;
   String users;
+  String verb;
   bool includeKuzzleMeta;
 }

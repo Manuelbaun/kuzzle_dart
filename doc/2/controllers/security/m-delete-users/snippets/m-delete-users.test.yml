@@ -1,0 +1,19 @@
+name: security#mDeleteUsers
+description: mDelete users
+hooks:
+  before: |
+    for i in 1 2 3; do
+      curl -H "Content-type: application/json" -d '{
+        "content": {
+          "profileIds": [ "default" ]
+        },
+        "credentials": {
+          "local": {
+            "username": "mDeleteUser'${i}'",
+            "password": "pass"
+          }
+        }
+      }' kuzzle:7512/users/mDeleteUser${i}/_create?refresh=wait_for
+    done
+template: print-result
+expected: '[mDeleteUser1, mDeleteUser2, mDeleteUser3]'

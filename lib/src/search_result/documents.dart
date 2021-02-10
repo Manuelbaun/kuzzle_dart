@@ -2,9 +2,9 @@ import '../kuzzle.dart';
 import '../kuzzle/request.dart';
 import '../kuzzle/response.dart';
 
-import 'abstract.dart';
+import 'search-result.dart';
 
-class DocumentsSearchResult extends KuzzleSearchResult {
+class DocumentsSearchResult extends SearchResult {
   DocumentsSearchResult(
     Kuzzle kuzzle, {
     KuzzleRequest request,

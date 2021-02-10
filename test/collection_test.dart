@@ -5,13 +5,17 @@ import 'package:kuzzle/kuzzle.dart';
 import 'helpers/kuzzle.dart';
 
 void main() {
-  final kuzzle = Kuzzle(WebSocketProtocol('localhost'));
+  final kuzzle = Kuzzle(WebSocketProtocol(Uri(
+    scheme: 'ws',
+    host: 'localhost',
+    port: 7512,
+  )));
   String defaultIndex;
   String defaultCollection;
 
   setUpAll(() async {
     await connectKuzzle(kuzzle);
-    await kuzzle.auth.login('local', adminCredentials);
+    // await kuzzle.auth.login('local', adminCredentials);
     defaultIndex = Uuid().v1();
     defaultCollection = 'posts';
   });
@@ -35,15 +39,6 @@ void main() {
         mapping: {'title': {}},
       );
       expect(response['acknowledged'], true);
-    });
-    test('delete', () async {
-      final response = await kuzzle.collection.delete(
-        defaultIndex,
-        defaultCollection,
-      );
-
-      expect(response, true);
-      await reCreate();
     });
 
     test('delete specification', () async {
@@ -114,12 +109,22 @@ void main() {
       final response = await kuzzle.collection.updateSpecifications(
         defaultIndex,
         defaultCollection,
-        false,
-        {},
+        {
+          'fields': {
+            'title': {
+              'mandatory': false,
+              'type': 'string'
+            },
+          },
+        },
       );
       expect(response, <String, dynamic>{
-        'strict': false,
-        'fields': {},
+        'fields': {
+          'title': {
+            'mandatory': false,
+            'type': 'string',
+          },
+        },
       });
     });
 
@@ -147,7 +152,6 @@ void main() {
       final response = await kuzzle.collection.validateSpecifications(
         defaultIndex,
         defaultCollection,
-        false,
         {},
       );
       expect(response, true);

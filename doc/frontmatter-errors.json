@@ -1,0 +1,18 @@
+{
+    "/core-classes/kuzzle/connect/": [
+        {
+            "error": "INVALID_VALUE",
+            "key": "type",
+            "expected": "[\"root\",\"branch\",\"page\"]",
+            "got": "code"
+        }
+    ],
+    "/core-classes/kuzzle/query/": [
+        {
+            "error": "INVALID_VALUE",
+            "key": "type",
+            "expected": "[\"root\",\"branch\",\"page\"]",
+            "got": "code"
+        }
+    ]
+}
